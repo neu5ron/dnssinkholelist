@@ -2,29 +2,8 @@
 
 import os, sys, re, traceback
 from bs4 import BeautifulSoup
-
-'''
-######## TODO:Lists to implement
-http://vxvault.net//URL_List.php
-http://malwaredb.malekal.com/export.php?type=url
-https://gist.github.com/neu5ron/8dd695d4cb26b6dcd997
-https://www.phishtank.com/phish_search.php?page=100&active=y&verified=u  # If status is online
-http://www.malwarepatrol.net/
-https://threatfeed.nullsecure.org/
-Checkout script https://github.com/stamparm/maltrail
-
-
-######## Additional lists not implemented:
-http://hosts-file.net/download/hosts.txt #Might be too many false positives
-http://support.it-mate.co.uk/downloads/HOSTS.txt #Might be too many false positives
-http://www.malwarepatrol.net/cgi/submit?action=list_bind #Requires Signing Up
-http://mtc.sri.com/live_data/malware_dns/ #Not wokring
-http://exposure.iseclab.org/malware_domains.txt #Not working
-https://spyeyetracker.abuse.ch/blocklist.php?download=domainblocklist #Discontinued
-
-# IP Reputation
-https://github.com/firehol/blocklist-ipsets
-'''
+import requests
+from pprint import pprint
 
 valid_domain_name_regex = re.compile('(([\da-zA-Z])([\w-]{,62})\.){,127}(([\da-zA-Z])[\w-]{,61})?([\da-zA-Z]\.((xn\-\-[a-zA-Z\d]+)|([a-zA-Z]{2,})))', re.IGNORECASE)
 place_to_store_script_files = '/tmp/sinkhole/'
@@ -36,7 +15,6 @@ if not os.path.exists(place_to_store_script_files):
         os.mkdir(place_to_store_script_files)
     except IOError:
         print 'Unable to create directory to store script files for path %s'%place_to_store_script_files
-
 
 domains_to_add_file_name = os.path.join(place_to_store_script_files, 'domains_to_add.sinkhole.tmp')
 domains_to_add_file = open(domains_to_add_file_name, 'w+')
@@ -50,6 +28,7 @@ custom_single_domains_file_directory = os.path.join( sinkhole_configuration_dire
 combined_custom_wildcard_domains_file_name = os.path.join( place_to_store_script_files, 'custom_wildcard_domains.sinkhole.tmp' )
 combined_custom_single_domains_file_name = os.path.join( place_to_store_script_files, 'custom_single_domains.sinkhole.tmp' )
 downloaded_domains_final_file = os.path.join( sinkhole_configuration_directory, 'sinkhole_lists/downloaded_domains/downloaded_domains.conf' )
+
 
 def find_files_to_search(directory):
     # Set the list that we will use to contain all the files that we want to parse that were found using the search
@@ -165,7 +144,7 @@ class download_and_parse_new_domains:
 
         for line in open(raw_filename, 'r').readlines():
 
-            if line.startswith('127.0.0.1') and '_' not in line and '#' not in line:
+            if line.startswith('127.0.0.1') and '_' not in line and '#' not in line:#TODO:"_" not in line? might exclude valid domains
                 add_domain = re.search(valid_domain_name_regex, line.split()[1].lower().strip())
 
                 if add_domain:
@@ -474,7 +453,98 @@ class download_and_parse_new_domains:
             else:
                 lines_skipped_file.write('skipped_%s:%s\n' %( dl_name, line ) )
 
+        parsed_filename.close()
         return self.total_domains_downloaded
+
+    def threatfeed_nullsecure_org(self):
+        download_from = 'https://threatfeed.nullsecure.org/'
+        dl_name = 'threatfeed_nullsecure_org'
+        self.DownloadURL(download_from, dl_name)
+        raw_filename = open( os.path.join(place_to_store_script_files, 'raw_download.' + dl_name + '.sinkhole.tmp'  ) )#TEST
+        parsed_filename = open( os.path.join(place_to_store_script_files, 'parsed_download.' + dl_name + '.sinkhole.tmp' ), 'w+' )
+        a = open(raw_filename, 'r').readlines()
+        pprint(a[0])
+
+    def hosts_file_net(self):
+        download_from = 'http://hosts-file.net/download/hosts.txt'
+        dl_name = 'hosts_file_net'
+        self.DownloadURL(download_from, dl_name)
+        raw_filename = os.path.join(place_to_store_script_files, 'raw_download.' + dl_name + '.sinkhole.tmp'  )
+        parsed_filename = open( os.path.join(place_to_store_script_files, 'parsed_download.' + dl_name + '.sinkhole.tmp' ), 'w+' )
+
+        with open( raw_filename, 'r' ) as parsing_file:
+
+            for line in parsing_file.readlines():
+
+                if line.startswith( '127.0.0.1' ) and not line.startswith( '#' ):
+                    add_domain = re.search(valid_domain_name_regex, line.split()[1].lower().strip())
+
+                    if add_domain:
+                        self.total_domains_downloaded += 1
+                        domains_to_add_file.write('%s\n' % add_domain.group() )
+                        parsed_filename.write( '%s\n'%add_domain.group() )
+
+                    else:
+                        lines_skipped_file.write('skipped_%s:%s\n' %( dl_name, line ) )
+
+        parsed_filename.close()
+        return self.total_domains_downloaded
+
+    def vxvault_net(self):
+        download_from = 'http://vxvault.net//URL_List.php'
+        dl_name = 'vxvault_net'
+        self.DownloadURL(download_from, dl_name)
+        raw_filename = os.path.join(place_to_store_script_files, 'raw_download.' + dl_name + '.sinkhole.tmp'  )
+        parsed_filename = open( os.path.join(place_to_store_script_files, 'parsed_download.' + dl_name + '.sinkhole.tmp' ), 'w+' )
+
+        with open( raw_filename, 'r' ) as parsing_file:
+
+            for line in parsing_file.readlines():
+
+                if line.startswith('http'):
+                    line = re.sub('http(s)?:\/\/', '', line)
+                    line = re.sub('\/.*', '', line)
+                    line = re.sub(':.*', '', line)
+                    line = re.sub('\?.*', '', line)
+                    add_domain = re.search(valid_domain_name_regex, line.lower().strip() )
+
+                    if add_domain:
+                        self.total_domains_downloaded += 1
+                        domains_to_add_file.write('%s\n' % add_domain.group() )
+                        parsed_filename.write( '%s\n'%add_domain.group() )
+
+                    else:
+                        lines_skipped_file.write('skipped_%s:%s\n' %( dl_name, line ) )
+
+        parsed_filename.close()
+        return self.total_domains_downloaded
+
+    def DownloadURL(self, download_from, dl_name):
+        try:
+            response = requests.get( download_from, timeout=(10, 2), allow_redirects=False )
+
+            with open( os.path.join(place_to_store_script_files, 'raw_download.' + dl_name + '.sinkhole.tmp'  ), 'wb' ) as downloaded_file:
+                downloaded_file.write(response.content)
+
+        except IOError as error:
+            print 'Could not download and write GeoIP database due to %s.\n'%error
+            sys.exit(1)#TODO:Continue On
+
+        except requests.HTTPError as error:
+            print 'Could not download and write GeoIP database due to %s.\n'%error
+            sys.exit(1)#TODO:Continue On
+
+        except requests.Timeout as error:
+            print 'Could not download and write GeoIP database due to %s.\n'%error
+            sys.exit(1)#TODO:Continue On
+
+        except requests.TooManyRedirects as error:
+            print 'Could not download and write GeoIP database due to %s.\n'%error
+            sys.exit(1)#TODO:Continue On
+
+        except requests.ConnectionError as error:
+            print 'Could not download and write GeoIP database due to %s.\n'%error
+            sys.exit(1)#TODO:Continue On
 
     def download_all(self):
         self._pgl_yoyo_org()
@@ -492,6 +562,9 @@ class download_and_parse_new_domains:
         self._cybercrime_tracker_net()
         self._malwareurls_joxeankoret_com()
         self._neu5ron_dynamicdns_list()
+        # self.threatfeed_nullsecure_org() #Retired and not finished anyways
+        self.hosts_file_net()
+        self.vxvault_net()
         return self.total_domains_downloaded
 
 
@@ -511,16 +584,19 @@ def main():
         # total_domains_downloaded = download_and_parse_new_domains()._cybercrime_tracker_net()#TEST
         # total_domains_downloaded = download_and_parse_new_domains()._malwareurls_joxeankoret_com()#TEST
         # total_domains_downloaded = download_and_parse_new_domains()._neu5ron_dynamicdns_list()#TEST
+        # total_domains_downloaded = download_and_parse_new_domains().threatfeed_nullsecure_org()#TEST
+        # total_domains_downloaded = download_and_parse_new_domains().hosts_file_net()#TEST
+        # total_domains_downloaded = download_and_parse_new_domains().vxvault_net()#TEST
 
         # Begin to download a list of malicious domains from osint lists
-        total_domains_downloaded = download_and_parse_new_domains().download_all()
+        total_domains_downloaded = download_and_parse_new_domains().download_all()#TODO:ReImplement
 
         print 'Total Domains Downloaded: %s' %total_domains_downloaded#TEST
         sys.exit(0)#TEST
 
         # Remove Duplicate Domains from domains_to_add_file_name
         os.system('cat %s > /tmp/sinkhole/temp.txt'%domains_to_add_file_name)
-        os.system('sort -u %s > %s.new && mv %s.new %s' % (#TODO:>/dev/null & 2>1 --look at proper syntax
+        os.system('sort -u %s > %s.new && mv %s.new %s' % (#TODO:>/dev/null & 2>1
         domains_to_add_file_name, domains_to_add_file_name, domains_to_add_file_name, domains_to_add_file_name))
         unique_domains_downloaded = len(open(domains_to_add_file_name, 'r').readlines())
 
