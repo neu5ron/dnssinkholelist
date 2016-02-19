@@ -1,6 +1,7 @@
 dnssinkholelist
 ========
-dnssinkholelist is a python package focused on combining open source lists of malicious domains, dynamic dns domains, and advertisement domains for use in a dns sinkhole on a bind server.
+dnssinkholelist is a python package focused on combining open source lists of malicious domains, dynamic dns domains, and advertisement domains for use in a dns sinkhole on a bind server or /etc/hosts file.
+
 
 Please Note
 ===========
@@ -8,15 +9,18 @@ Please Note
 Therefore consider it a work in progress.
 * Requires internet access for: downloading domain lists
 
+
 Requirements
 ============
 * Python 2.7
 * pip install -U requests[security] #Install requests security
 * pip install -U beautifulsoup; #For HTML Parsing
 
+
 Install
 =======
 pip install -e git+https://github.com/neu5ron/dnssinkholelist@master#egg=dnssinkholelist
+
 
 Implemented Malware Lists
 ==============
@@ -37,28 +41,12 @@ Implemented Malware Lists
 * https://gist.githubusercontent.com/neu5ron/8dd695d4cb26b6dcd997/raw/5c31ae47887abbff76461e11a3733f26bddd5d44/dynamic-dns.txt
 * http://hosts-file.net/download/hosts.txt #Might be too many false positives
 * http://vxvault.net//URL_List.php
+* http://malwaredb.malekal.com/export.php?type=url
 
 
 TODO:Lists to implement
 ==============
-* http://malwaredb.malekal.com/export.php?type=url
 * https://www.phishtank.com/phish_search.php?page=100&active=y&verified=u  # If status is online
-
-
-
-TODO List
-==============
-* script log file date in filename
-* domains skipped file date in filename
-* instead of open & write, use open with
-* Use urllib instead of wget or python wget import wget
-* use python os commands for error checking and such
-# test if bind directories exist and if not create them etc
-# add variables for where bind files should be stored, like /use/share/bind folder thing
-* If anything returns no values then email or alert
-* Implement WhiteList via  a gist/github link..
-* Add oh sh!t URL test for a gist/github link..
-* Ability to choose between creating a host file or bind file
 
 
 Additional lists not implemented
@@ -70,3 +58,16 @@ Additional lists not implemented
 * https://spyeyetracker.abuse.ch/blocklist.php?download=domainblocklist #Discontinued
 * https://threatfeed.nullsecure.org/ #TOOOOOOOOO Late to the party? No updates in 2016 as of 2016-02-18.
 * http://www.malwarepatrol.net/ #Requires Subscription
+
+
+TODO List
+==============
+* Use python os commands for error checking and such
+* Test if bind directories exist and if not create them etc
+* Add variables for where bind files should be stored, like /use/share/bind folder thing
+* If anything returns no values then email or alert/log
+* Implement WhiteList via  a gist/github link that is auto updated like the other lists/feeds
+* Ability to choose between creating a host file or bind file..if bind then only get lowest level domain. if host file then keep as is
+* Use python logging instead of print and such
+* Option to exclude some whitelist / make it a yaml?
+* CLI Options

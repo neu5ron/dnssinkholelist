@@ -3,7 +3,7 @@ import sys
 import io
 
 NAME = 'dnssinkholelist'
-VERSION = '1.0.1'
+VERSION = '1.0.2'
 AUTHOR = 'neu5ron'
 AUTHOR_EMAIL = 'therealneu5ron AT gmail DOT com'
 DESCRIPTION = "Combine information about a domain in JSON format"
@@ -28,6 +28,7 @@ if sys.version_info >= (3,):
 else:
     INSTALL_REQUIRES.append("requests[security]")
     INSTALL_REQUIRES.append("beautifulsoup")
+    INSTALL_REQUIRES.append("pyyaml")
 
 setup(
     name=NAME,

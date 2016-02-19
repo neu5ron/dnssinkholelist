@@ -1,0 +1,139 @@
+Microsoft:
+  "Domains": [
+                'microsoftnow.com',
+                'microsoftonline-p.com',
+                'microsoft.com',
+                'windowsupdate.com',
+                'outlook.com',
+                'office.com',
+                'msocdn.com',
+                'microsoftstore.com',
+                'microsofttranslator.com',
+                'skype.com',
+                'windows.net',
+                'onmicrosoft.com',
+                'nsatc.net',
+              ]
+
+Google:
+  "Domains": [
+                'google.com',
+                'gstatic.com',
+                'googleapis.com',
+                'googletagservices.com',
+                'googleusercontent.com',
+              ]
+
+Yahoo:
+  "Domains": [
+                'yahoo.com',
+                'yimg.com',
+              ]
+   
+Java:
+  "Domains": [
+                'javafx.com',
+                'oracle.com',
+                'sun.com',
+                'java.com',
+                'java.net',
+              ]
+
+Adobe:
+  "Domains": [
+                'adobe.com',
+                'macromedia.com',
+              ]
+
+Amazon:
+  "Domains": [
+                'amazon.com',
+                'ssl-images-amazon.com',
+                'amazonaws.com', #May be bad to include...
+              ]
+
+Social:
+  "Domains": [
+                'slack.com',
+                'facebook.com',
+                'twitter.com',
+                'pinterest.com',
+                'nytimes.com',
+              ]
+
+Software:
+  "Domains": [
+                'notepad-plus-plus.org',
+                'docker.com',
+                'github.com',
+                'duosecurity.com',
+                'lastpass.com',
+                'keepersecurity.com',
+                'agilebits.com',
+                'bitbucket.org',
+                'dropboxstatic.com',
+                'dropbox.com',
+                'python.org',
+                'bitbucket.org',
+                'virtualbox.org',
+              ]
+
+Operating System Updates:
+  "Domains": [
+                'launchpad.net',
+                'ubuntu.com',
+                'centos.org',
+                'redhat.com',
+                'dell.com',
+                'vmware.com',
+              ]
+
+Security Sites and Antiviruses and other NSM:
+  "Domains": [
+                'mcafee.com',
+                'nai.com',
+                'avast.com',
+                'symantecliveupdate.com',
+                'mbamupdates.com',
+                'virustotal.com',
+                'virustotalcloud.appspot.com',
+                'hybrid-analysis.com',
+                'sucuri.net',
+              ]
+
+General Hosting that you may not want to block:
+  "Domains": [
+                'edgekey.net',
+                'cloudfront.net',
+                'edgesuite.net',
+                'akamaihd.net',
+                'akamai.net',
+                'edgesuite.net',
+                'edgekey.net',
+                'quantserve.com',
+                'ssl.fastly.net',
+                '2o7.net',
+                'quantcast.com',
+                'akamaiedge.net',
+                'fastly.net',
+                'akadns.net',
+              ]
+
+Other Companies:
+  "Domains": [
+                'fireeye.com',
+                'tippingpoint.com',
+                'ibm.com',
+                'paloaltonetworks.com',
+              ]
+
+NTP:
+  "Domains": [
+                'ntp.org',
+                'glb.nist.gov',
+              ]
+
+Keep?:
+  "Domains": [
+              ]
+

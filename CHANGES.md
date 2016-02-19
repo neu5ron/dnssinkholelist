@@ -1,5 +1,12 @@
 Changelog
 =========
+1.0.2 (2016-02-17)
+-------------------
+-more lists added
+-code cleaned up
+-added whitelist file.not implemented yet
+-rewrote unique domains
+
 1.0.1 (2016-02-17)
 -------------------
 -more lists added
