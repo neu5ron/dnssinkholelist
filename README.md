@@ -24,6 +24,11 @@ Install
 pip install -e git+https://github.com/neu5ron/dnssinkholelist@master#egg=dnssinkholelist
 
 
+Usage
+=======
+python2.7 DNSSinkholeList.py
+
+
 Malware Lists
 ==============
 - [x] https://pgl.yoyo.org/adservers/serverlist.php?hostformat=;showintro=0 #Advertisment domains
