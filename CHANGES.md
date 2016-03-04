@@ -1,5 +1,9 @@
 Changelog
 =========
+1.0.4 (2016-03-04)
+-------------------
+-added https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt
+
 1.0.3 (2016-03-02)
 -------------------
 -more lists added

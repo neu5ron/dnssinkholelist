@@ -6,6 +6,7 @@ from pprint import pprint
 import json
 import yaml
 import argparse
+import domaininformation
 
 valid_domain_name_regex = re.compile('(([\da-zA-Z])([\w-]{,62})\.){,127}(([\da-zA-Z])[\w-]{,61})?([\da-zA-Z]\.((xn\-\-[a-zA-Z\d]+)|([a-zA-Z]{2,})))', re.IGNORECASE)
 place_to_store_script_files = '/tmp/sinkhole/'
@@ -91,9 +92,15 @@ def find_files_to_search(directory):
         return domains
 
 
+
 class download_and_parse_new_domains:
+
+    verify_alexa_rank = 2000
+    total_domains_downloaded = 0
+
     def __init__(self):
-        self.total_domains_downloaded = 0
+        args = self.GatherArguments()
+        self.verify_alexa_rank = args.verify_alexa_rank
 
     def testing_new_download(self):
 
@@ -115,7 +122,7 @@ class download_and_parse_new_domains:
                 add_domain = re.search(valid_domain_name_regex, line.lower().strip() )
 
                 if add_domain:
-                    total_domains_downloaded += 1
+                    self.total_domains_downloaded += 1
                     print add_domain.group().lower().strip()  # TESTING
                 else:
                     lines_skipped_file.write('skipped:%s\n' % line)
@@ -208,6 +215,9 @@ class download_and_parse_new_domains:
 
                 else:
                     lines_skipped_file.write('skipped_%s:%s\n' %( download_name, line ) )
+
+            else:
+                lines_skipped_file.write('skipped_%s:%s\n' %( download_name, line ) )
 
         parsed_filename.close()
         return self.total_domains_downloaded
@@ -637,9 +647,35 @@ class download_and_parse_new_domains:
                         self.total_domains_downloaded += 1
                         domains_to_add_file.write('%s\n' % add_domain.group() )
                         parsed_filename.write( '%s\n'%add_domain.group() )
+                        # self.ExcludeDomain( add_domain.group() )##TODO:TEST
 
                     else:
                         lines_skipped_file.write('skipped_%s:%s\n' %( download_name, line ) )
+
+                else:
+                    lines_skipped_file.write('skipped_%s:%s\n' %( download_name, line ) )
+
+        parsed_filename.close()
+        return self.total_domains_downloaded
+
+    def _ransomwaretracker_abuse_ch(self):
+        download_url = "https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt"
+        download_name = '_ransomwaretracker_abuse_ch'
+        if not self.DownloadURL(download_url, download_name):
+            return
+        raw_filename = os.path.join(place_to_store_script_files, 'raw_download.' + download_name + '.sinkhole.tmp'  )
+        parsed_filename = open( os.path.join(place_to_store_script_files, 'parsed_download.' + download_name + '.sinkhole.tmp' ), 'w+' )
+
+        for line in open(raw_filename, 'r').readlines():
+
+            if '#' not in line:
+                add_domain = re.search(valid_domain_name_regex, line.lower().strip())
+
+                if add_domain:
+                    self.total_domains_downloaded += 1
+                    domains_to_add_file.write( '%s\n' % add_domain.group())
+                    parsed_filename.write( '%s\n'%add_domain.group() )
+                    # self.ExcludeDomain( add_domain.group() )#TODO:TEST
 
                 else:
                     lines_skipped_file.write('skipped_%s:%s\n' %( download_name, line ) )
@@ -653,6 +689,26 @@ class download_and_parse_new_domains:
         download_name = '$Name'
         if not self.DownloadURL(download_url, download_name):
             return
+
+    def ExcludeDomain(self, _domain):
+        """
+        Exclude domain if whitelist or Alexa rank is <= what is set. Returns true if we should exclude.
+        :param _domain:
+        :return: bool
+        """
+
+        # Ignore Alexa Rank if set
+        if domaininformation.DomainInformation(_domain).is_domain():
+            _alexa_rank = domaininformation.DomainInformation(_domain).get_alexa_rank().get('alexa_rank')
+
+            # Ignore Alexa Rank if set
+            if self.verify_alexa_rank:
+
+                if _alexa_rank and _alexa_rank <= self.verify_alexa_rank:
+                    print 'Ignoring {0} due to alexa rank of {1}\n'.format( _domain, _alexa_rank)#TEST
+                    return True
+                else:
+                    return False
 
     def DownloadURL(self, download_url, download_name, verify_ssl=True):
         try:
@@ -719,9 +775,10 @@ class download_and_parse_new_domains:
         self._vxvault_net()
         self._malwaredb_malekal_com()
         self._phishtank_com()
+        self._ransomwaretracker_abuse_ch()
         return self.total_domains_downloaded
 
-    def FinalListFormat( self, bind_file=True, hosts_file=False ):
+    def FinalListFormat( self, bind_file=True, hosts_file=False ):#TODO:Finish
         if bind_file:
             #Write the domains we want to add to a bind format file that we will use to import into the database
             with open(downloaded_domains_final_file, 'w') as final_file:
@@ -729,6 +786,69 @@ class download_and_parse_new_domains:
                     open(downloaded_domains_final_file, 'a+').write(
                         'zone \"%s\" IN { type master; file \"/etc/bind/sinkhole_entire_domain.nowhere\"; notify no; };\n' % domain
                     )
+
+    def GatherArguments(self):
+        try:
+            # General description/usage
+            parser = argparse.ArgumentParser(
+                description='Download sinkhole lists from{0}'.format( self.SinkHoleLists() ), formatter_class=argparse.RawTextHelpFormatter, epilog=self.Usage() )
+
+            # Add required arguments
+
+            # Add optional arguments
+            parser.add_argument( '--alexa-rank=', type=int, required=False, default=self.verify_alexa_rank, dest='verify_alexa_rank',
+                                     help='Filter out domain with Alexa Rank <= number you define. Maximum is 1,000,000.\n\n' )
+
+            # Return all arguments
+            return parser.parse_args()
+
+        except ( TypeError, ValueError, argparse.ArgumentError, argparse.ArgumentTypeError ) as e:
+            print 'CLI error:\n%s' %e
+            sys.exit(1)
+
+    def Usage(self):
+        usage = '''
+        ************
+        Usage Examples:
+
+        # Standard use specifying no format
+        1) DNSSinkholehost.py
+
+        # Specifying bind format for output of the list #TODO:Not Finished
+        2) DNSSinkholehost.py --format=bind
+
+        # Specifying /etc/hosts format for output of the list #TODO:Not Finished
+        3) DNSSinkholehost.py --format=hosts
+
+        # Filter out all domains with an Alexa Rank of 2000 or less
+        3) DNSSinkholehost.py --alexa-rank=2000
+        '''
+        return usage
+
+    def SinkHoleLists(self):
+        lists = '''
+        https://pgl.yoyo.org/adservers/serverlist.php?hostformat=;showintro=0
+        http://mirror1.malwaredomains.com/files/justdomains / https://mirror.cedia.org.ec/malwaredomains/justdomains
+        https://www.malwaredomainlist.com/hostslist/hosts.txt
+        https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist
+        https://palevotracker.abuse.ch/blocklists.php?download=domainblocklist
+        https://feodotracker.abuse.ch/blocklist/?download=domainblocklist
+        https://isc.sans.edu/feeds/suspiciousdomains_Low.txt
+        https://isc.sans.edu/feeds/suspiciousdomains_Medium.txt
+        https://isc.sans.edu/feeds/suspiciousdomains_High.txt
+        https://malc0de.com/bl/ZONES
+        http://labs.sucuri.net/malware-data
+        http://cybercrime-tracker.net/all.php
+        http://malwareurls.joxeankoret.com/normal.txt
+        https://gist.githubusercontent.com/neu5ron/8dd695d4cb26b6dcd997/raw/5c31ae47887abbff76461e11a3733f26bddd5d44/dynamic-dns.txt
+        http://hosts-file.net/download/hosts.txt #Might be too many false positives
+        http://vxvault.net//URL_List.php
+        http://malwaredb.malekal.com/export.php?type=url
+        http://support.it-mate.co.uk/downloads/HOSTS.txt #Might be too many false positives
+        https://data.phishtank.com/data/online-valid.json
+        https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt
+        '''
+        return lists
 
 
 def main():
@@ -753,12 +873,13 @@ def main():
         # total_domains_downloaded = download_and_parse_new_domains()._vxvault_net()#TESTING
         # total_domains_downloaded = download_and_parse_new_domains()._malwaredb_malekal_com()#TESTING
         # total_domains_downloaded = download_and_parse_new_domains()._phishtank_com()#TESTING
+        # total_domains_downloaded = download_and_parse_new_domains()._ransomwaretracker_abuse_ch()#TESTING
 
         # Begin to download a list of malicious domains from the lists
-        total_domains_downloaded = download_and_parse_new_domains().download_all()#TODO:ReImplement
+        total_domains_downloaded = download_and_parse_new_domains().download_all()#TODO:Always ReImplement after testing
         domains_to_add_file.close()
 
-        # Remove duplicate domains and sort
+        # Remove duplicate domains and sort#TODO:Make more efficient by making into a function as new domains are added/written
         unique_domains_downloaded = set()
         with open(domains_to_add_file_name, 'r') as dl_domains:
             for line in dl_domains:
@@ -839,67 +960,6 @@ def main():
         os.system('rndc reload')
         # Flush the DNS
         os.system('rndc flush')
-
-
-def SinkHoleLists():
-    lists = '''
-    https://pgl.yoyo.org/adservers/serverlist.php?hostformat=;showintro=0
-    http://mirror1.malwaredomains.com/files/justdomains / https://mirror.cedia.org.ec/malwaredomains/justdomains
-    https://www.malwaredomainlist.com/hostslist/hosts.txt
-    https://zeustracker.abuse.ch/blocklist.php?download=domainblocklist
-    https://palevotracker.abuse.ch/blocklists.php?download=domainblocklist
-    https://feodotracker.abuse.ch/blocklist/?download=domainblocklist
-    https://isc.sans.edu/feeds/suspiciousdomains_Low.txt
-    https://isc.sans.edu/feeds/suspiciousdomains_Medium.txt
-    https://isc.sans.edu/feeds/suspiciousdomains_High.txt
-    https://malc0de.com/bl/ZONES
-    http://labs.sucuri.net/malware-data
-    http://cybercrime-tracker.net/all.php
-    http://malwareurls.joxeankoret.com/normal.txt
-    https://gist.githubusercontent.com/neu5ron/8dd695d4cb26b6dcd997/raw/5c31ae47887abbff76461e11a3733f26bddd5d44/dynamic-dns.txt
-    http://hosts-file.net/download/hosts.txt #Might be too many false positives
-    http://vxvault.net//URL_List.php
-    http://malwaredb.malekal.com/export.php?type=url
-    http://support.it-mate.co.uk/downloads/HOSTS.txt #Might be too many false positives
-    https://data.phishtank.com/data/online-valid.json
-    '''
-    return lists
-
-
-def Usage():
-    usage = '''
-    ************
-    Usage Examples:
-
-    # Standard use specifying no format
-    1) DNSSinkholehost.py
-
-    # Specifying bind format for output of the list #TODO:Not Finished
-    2) DNSSinkholehost.py --format=bind
-
-    # Specifying /etc/hosts format for output of the list #TODO:Not Finished
-    3) DNSSinkholehost.py --format=hosts
-    '''
-    return usage
-
-
-def GatherArguments():
-
-    try:
-        # General description/usage
-        parser = argparse.ArgumentParser(
-            description='Download sinkhole lists from{0}'.format( SinkHoleLists() ), formatter_class=argparse.RawTextHelpFormatter, epilog=Usage() )
-
-        # Add required arguments
-
-        # Add optional arguments
-
-        # Return all arguments
-        return parser.parse_args()
-
-    except ( TypeError, ValueError, argparse.ArgumentError, argparse.ArgumentTypeError ) as e:
-        print 'CLI error:\n%s' %e
-        sys.exit(1)
 
 
 if __name__ == '__main__':

@@ -7,7 +7,7 @@ Please Note
 ===========
 * This is a script I used for a while for a bind server--- a lot needs cleaned up before you use it automatically to feed into bind or /etc/hosts. Consider it a work in progress.
 However, you can use it for a unique list of malicious/sinkhole domains from below.
-* Requires internet access for downloading domain lists listed below.
+* Requires internet access for downloading domain lists listed below and Alexa database.
 
 
 Requirements
@@ -17,6 +17,7 @@ Requirements
 * pip install -U beautifulsoup; #For HTML Parsing
 * pip install -U pyyaml; #For future config and whitelisting parsing
 * pip install -U argparse #For future CLI parsing
+* pip install -e git+https://github.com/neu5ron/domaininformation@master#egg=domaininformation #For download of Alexa database and filtering based on Alexa rank
 
 
 Install
@@ -50,6 +51,8 @@ Malware Lists
 - [x] http://malwaredb.malekal.com/export.php?type=url
 - [x] http://support.it-mate.co.uk/downloads/HOSTS.txt #Might be too many false positives
 - [x] https://data.phishtank.com/data/online-valid.json
+- [x] https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt
+- [ ] Add other domain blocklists from https://ransomwaretracker.abuse.ch/blocklist/ ?
 
 
 Additional lists not implemented
