@@ -1,5 +1,9 @@
 Changelog
 =========
+1.0.5 (2016-03-14)
+-------------------
+-added http://mirror1.malwaredomains.com/files/dynamic_dns.txt
+
 1.0.4 (2016-03-04)
 -------------------
 -added https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt

@@ -52,6 +52,7 @@ Malware Lists
 - [x] http://support.it-mate.co.uk/downloads/HOSTS.txt #Might be too many false positives
 - [x] https://data.phishtank.com/data/online-valid.json
 - [x] https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt
+- [x] http://mirror1.malwaredomains.com/files/dynamic_dns.txt
 - [ ] Add other domain blocklists from https://ransomwaretracker.abuse.ch/blocklist/ ?
 
 

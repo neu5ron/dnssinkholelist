@@ -3,7 +3,7 @@ import sys
 import io
 
 NAME = 'dnssinkholelist'
-VERSION = '1.0.4'
+VERSION = '1.0.5'
 AUTHOR = 'neu5ron'
 AUTHOR_EMAIL = 'therealneu5ron AT gmail DOT com'
 DESCRIPTION = "Combine information about a domain in JSON format"

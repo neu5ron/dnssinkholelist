@@ -84,6 +84,7 @@ Operating System Updates:
                 'ubuntu.com',
                 'centos.org',
                 'redhat.com',
+                'ibm.com',
                 'dell.com',
                 'vmware.com',
               ]
@@ -98,6 +99,9 @@ Security Sites and Antiviruses and other NSM:
                 'virustotal.com',
                 'virustotalcloud.appspot.com',
                 'hybrid-analysis.com',
+                'fireeye.com',
+                'tippingpoint.com',
+                'paloaltonetworks.com',
                 'sucuri.net',
               ]
 
@@ -119,21 +123,18 @@ General Hosting that you may not want to block:
                 'akadns.net',
               ]
 
-Other Companies:
-  "Domains": [
-                'fireeye.com',
-                'tippingpoint.com',
-                'ibm.com',
-                'paloaltonetworks.com',
-              ]
-
 NTP:
   "Domains": [
                 'ntp.org',
                 'glb.nist.gov',
               ]
 
+Other Companies:
+  "Domains": [
+              ]
+
 Keep?:
   "Domains": [
+  2o7.net#What to do about this... make this exact match?yes..
               ]
 

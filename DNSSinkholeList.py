@@ -152,6 +152,7 @@ class download_and_parse_new_domains:
         return self.total_domains_downloaded
 
     def _mirror1_malwaredomains_com(self):
+        #USING HTTPS version. No longer enabled see '_malwaredomains_com'
         download_url = "http://mirror1.malwaredomains.com/files/justdomains"
         download_name = '_mirror1_malwaredomains_com'
         if not self.DownloadURL(download_url, download_name):
@@ -192,6 +193,35 @@ class download_and_parse_new_domains:
             else:
                 lines_skipped_file.write('skipped_%s:%s\n' %( download_name, line ) )
 
+        parsed_filename.close()
+        return self.total_domains_downloaded
+
+    def _dynamicdns_malwaredomains_com(self):
+        download_url = "http://mirror1.malwaredomains.com/files/dynamic_dns.txt"
+        download_name = '_dynamicdns_malwaredomains_com'
+        if not self.DownloadURL(download_url, download_name):
+            return
+        raw_filename = os.path.join(place_to_store_script_files, 'raw_download.' + download_name + '.sinkhole.tmp'  )
+        parsed_filename = open( os.path.join(place_to_store_script_files, 'parsed_download.' + download_name + '.sinkhole.tmp' ), 'w+' )
+
+        with open( raw_filename, 'r' ) as parsing_file:
+            for line in parsing_file.readlines():
+
+                if not line.startswith('#'):
+                    add_domain = re.search(valid_domain_name_regex, line.lower().strip() )
+
+                    if add_domain:
+                        self.total_domains_downloaded += 1
+                        domains_to_add_file.write( '%s\n' % add_domain.group() )
+                        parsed_filename.write( '%s\n'%add_domain.group() )
+
+                    else:
+                        lines_skipped_file.write('skipped_%s:%s\n' %( download_name, line ) )
+
+                else:
+                    lines_skipped_file.write('skipped_%s:%s\n' %( download_name, line ) )
+
+        parsing_file.close()
         parsed_filename.close()
         return self.total_domains_downloaded
 
@@ -776,6 +806,7 @@ class download_and_parse_new_domains:
         self._malwaredb_malekal_com()
         self._phishtank_com()
         self._ransomwaretracker_abuse_ch()
+        self._dynamicdns_malwaredomains_com()
         return self.total_domains_downloaded
 
     def FinalListFormat( self, bind_file=True, hosts_file=False ):#TODO:Finish
@@ -874,6 +905,7 @@ def main():
         # total_domains_downloaded = download_and_parse_new_domains()._malwaredb_malekal_com()#TESTING
         # total_domains_downloaded = download_and_parse_new_domains()._phishtank_com()#TESTING
         # total_domains_downloaded = download_and_parse_new_domains()._ransomwaretracker_abuse_ch()#TESTING
+        # total_domains_downloaded = download_and_parse_new_domains()._dynamicdns_malwaredomains_com()#TESTING
 
         # Begin to download a list of malicious domains from the lists
         total_domains_downloaded = download_and_parse_new_domains().download_all()#TODO:Always ReImplement after testing
