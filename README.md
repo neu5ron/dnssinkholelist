@@ -12,9 +12,11 @@ However, you can use it for a unique list of malicious/sinkhole domains from bel
 
 Requirements
 ============
+* Linux
 * Python 2.7
 * pip install -U requests[security] #Install requests security
-* pip install -U beautifulsoup; #For HTML Parsing
+* pip install -U beautifulsoup4; #For HTML Parsing
+* pip install -U lxml; #For beautifulsoup4
 * pip install -U pyyaml; #For future config and whitelisting parsing
 * pip install -U argparse #For future CLI parsing
 * pip install -e git+https://github.com/neu5ron/domaininformation@master#egg=domaininformation #For download of Alexa database and filtering based on Alexa rank
@@ -53,7 +55,7 @@ Malware Lists
 - [x] https://data.phishtank.com/data/online-valid.json
 - [x] https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt
 - [x] http://mirror1.malwaredomains.com/files/dynamic_dns.txt
-- [ ] https://www.threatcrowd.org/feeds/domains.txt
+- [x] https://www.threatcrowd.org/feeds/domains.txt
 - [ ] Add other domain blocklists from https://ransomwaretracker.abuse.ch/blocklist/ ?
 
 
@@ -68,13 +70,13 @@ Additional lists not implemented
 
 TODO List
 ==============
+- [ ] Make unique/sorted domains into a function as a new one is added in the corresponding lists function... instead of at the end
 - [ ] Use python os commands for error checking and such
-- [ ] Test if bind directories exist and if not create them etc
-- [ ] Add variables for where bind files should be stored, like /use/share/bind folder thing (VIA CLI)
 - [ ] If anything returns no values then email or alert/log
 - [ ] Ability to choose between creating a host file or bind file..if bind then only get lowest level domain. if host file then keep as is (VIA CLI)
+	- [ ] Test if bind directories exist and if not create them etc
+	- [ ] Add variables for where bind files should be stored, like /use/share/bind folder thing (VIA CLI)
 - [ ] Use python logging instead of print and such
 - [ ] Option to exclude some whitelist / make it a yaml?
 	- [ ] Implement WhiteList via  a gist/github link that is auto updated like the other lists/feeds
-- [ ] Make unique/sorted domains into a function as a new one is added in the corresponding lists function... instead of at the end
-- [ ] Number each list, and add ability to disable list via the command line by specifying something like --disable-lists=1,2,3,4,5
+	- [ ] Number each list, and add ability to disable list via the command line by specifying something like --disable-lists=1,2,3,4,5

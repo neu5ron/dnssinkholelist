@@ -1,5 +1,11 @@
 Changelog
 =========
+1.0.6 (2016-03-30)
+-------------------
+-https://www.threatcrowd.org/feeds/domains.txt
+-increased urllib/requests read timeout to 8 seconds.
+-fixed beautifulsoup import
+
 1.0.5 (2016-03-14)
 -------------------
 -added http://mirror1.malwaredomains.com/files/dynamic_dns.txt

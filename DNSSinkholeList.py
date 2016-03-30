@@ -713,6 +713,31 @@ class download_and_parse_new_domains:
         parsed_filename.close()
         return self.total_domains_downloaded
 
+    def www_threatcrowd_org(self):
+        download_url = "https://www.threatcrowd.org/feeds/domains.txt"
+        download_name = 'www_threatcrowd_org'
+        if not self.DownloadURL(download_url, download_name):
+            return
+        raw_filename = os.path.join(place_to_store_script_files, 'raw_download.' + download_name + '.sinkhole.tmp'  )
+        parsed_filename = open( os.path.join(place_to_store_script_files, 'parsed_download.' + download_name + '.sinkhole.tmp' ), 'w+' )
+
+        for line in open(raw_filename, 'r').readlines():
+
+            if '#' not in line:
+                add_domain = re.search(valid_domain_name_regex, line.lower().strip())
+
+                if add_domain:
+                    self.total_domains_downloaded += 1
+                    domains_to_add_file.write( '%s\n' % add_domain.group())
+                    parsed_filename.write( '%s\n'%add_domain.group() )
+                    # self.ExcludeDomain( add_domain.group() )#TODO:TEST
+
+                else:
+                    lines_skipped_file.write('skipped_%s:%s\n' %( download_name, line ) )
+
+        parsed_filename.close()
+        return self.total_domains_downloaded
+
     def GetWhiteList(self):
         #TODO:Finish
         download_url = '$URL'
@@ -746,7 +771,7 @@ class download_and_parse_new_domains:
             if not verify_ssl:
                 requests.packages.urllib3.disable_warnings()
 
-            response = requests.get( download_url, timeout=(10, 2), allow_redirects=False, verify=verify_ssl )
+            response = requests.get( download_url, timeout=(10, 8), allow_redirects=False, verify=verify_ssl )
 
             with open( os.path.join(place_to_store_script_files, 'raw_download.' + download_name + '.sinkhole.tmp'  ), 'wb' ) as downloaded_file:
                 downloaded_file.write(response.content)
@@ -785,7 +810,6 @@ class download_and_parse_new_domains:
 
     def download_all(self):
         self._pgl_yoyo_org()
-        # self._mirror1_malwaredomains_com()
         self._malwaredomains_com()
         self._www_malwaredomainlist_com()
         self._support_it_mate_co_uk()
@@ -800,13 +824,17 @@ class download_and_parse_new_domains:
         self._cybercrime_tracker_net()
         self._malwareurls_joxeankoret_com()
         self._neu5ron_dynamicdns_list()
-        # self.threatfeed_nullsecure_org() #Retired and not finished anyways
         self._hosts_file_net()
         self._vxvault_net()
         self._malwaredb_malekal_com()
         self._phishtank_com()
         self._ransomwaretracker_abuse_ch()
         self._dynamicdns_malwaredomains_com()
+        self.www_threatcrowd_org()
+
+        # self.threatfeed_nullsecure_org() #Retired and not finished anyways
+        # self._mirror1_malwaredomains_com() #Non HTTPs version
+
         return self.total_domains_downloaded
 
     def FinalListFormat( self, bind_file=True, hosts_file=False ):#TODO:Finish
@@ -906,6 +934,7 @@ def main():
         # total_domains_downloaded = download_and_parse_new_domains()._phishtank_com()#TESTING
         # total_domains_downloaded = download_and_parse_new_domains()._ransomwaretracker_abuse_ch()#TESTING
         # total_domains_downloaded = download_and_parse_new_domains()._dynamicdns_malwaredomains_com()#TESTING
+        # total_domains_downloaded = download_and_parse_new_domains().www_threatcrowd_org()#TESTING
 
         # Begin to download a list of malicious domains from the lists
         total_domains_downloaded = download_and_parse_new_domains().download_all()#TODO:Always ReImplement after testing
@@ -924,74 +953,10 @@ def main():
         print 'Total Domains Downloaded: %s' %total_domains_downloaded#TESTING
         print 'Total Unique Domains Downloaded: %s' %total_unique_domains_downloaded#TESTING
         print 'Unique Domains stored at:\n"%s"' %parsed_domains_to_add_file_name#TESTING
-        return#TEST
+        script_log_file.write( 'Total Domains Downloaded: {0}\n'.format(total_domains_downloaded) )
+        script_log_file.write( 'Total Unique Domains Downloaded: {0}\n'.format(total_unique_domains_downloaded) )
+        script_log_file.write( 'Unique Domains stored at:\n"{0}"\n'.format(parsed_domains_to_add_file_name) )
 
-        # Combine all custom wildcard domains into one file
-        # os.system( "cat %s*.conf | awk '{ print $2 }' | sed 's/\"//g' > %s" % ( custom_wildcard_domains_file_directory,
-        #  combined_custom_wildcard_domains_file_name ) )
-        # os.system( "cat %s*.conf | awk '{ print $2 }' | sed 's/\"//g' > %s" % ( custom_single_domains_file_directory,
-        # combined_custom_single_domains_file_name ) )
-
-        # List of domains to remove that have already been added and domains that should never be sinkholed
-        domains_to_remove = set()
-        wildcard_domains_to_remove = find_files_to_search(custom_wildcard_domains_file_directory)
-        single_domains_to_remove = find_files_to_search(custom_single_domains_file_directory)
-
-        # Remove domains that have already been sinkholed using the custom files wildcard domains
-        for clean_domain in wildcard_domains_to_remove:
-            ld_length = len(clean_domain.split('.'))
-
-            for domain_to_remove in open(domains_to_add_file_name, 'r', ).read().splitlines():
-                if clean_domain == '.'.join(domain_to_remove.split('.')[-ld_length:]):
-                    domains_to_remove.add(domain_to_remove)
-                # print domain_to_remove#TESTING
-                skipped_whitelisted_domains_file.write('Custom Already implemented Wildcard:\t%s' %domain_to_remove )
-
-
-        # Remove domains that have already been sinkholed using the custom files single domains
-        for clean_domain in single_domains_to_remove:
-            ld_length = len(clean_domain.split('.'))
-
-            for domain_to_remove in open(domains_to_add_file_name, 'r', ).read().splitlines():
-                if clean_domain == domain_to_remove:
-                    domains_to_remove.add(domain_to_remove)
-                    # print domain_to_remove#TESTING
-                    skipped_whitelisted_domains_file.write('Custom Already implemented :\t%s' %domain_to_remove )
-
-        # Remove whitelisted wildcard domains
-        for clean_domain in open(never_sinkhole_domains_wildcards_file_name, 'r').read().splitlines():
-            ld_length = len(clean_domain.split('.'))
-
-            for domain_to_remove in open(domains_to_add_file_name, 'r', ).read().splitlines():
-                if clean_domain == '.'.join(domain_to_remove.split('.')[-ld_length:]):
-                    domains_to_remove.add(domain_to_remove)
-                    skipped_whitelisted_domains_file.write('Whitelist Wildcard:\t%s' %domain_to_remove )
-
-        # Remove whitelisted domains
-        for clean_domain in open(never_sinkhole_domains_file_name, 'r').read().splitlines():
-
-            for domain_to_remove in open(domains_to_add_file_name, 'r', ).read().splitlines():
-                if clean_domain == domain_to_remove:
-                    domains_to_remove.add(domain_to_remove)
-                    skipped_whitelisted_domains_file.write('Whitelist:\t%s' %domain_to_remove )
-
-        all_domains = open(domains_to_add_file_name, 'r', ).read().splitlines()
-
-        for domain_to_remove in domains_to_remove:
-            all_domains.remove('%s' % domain_to_remove)
-
-        open('%s' % domains_to_add_file_name, 'w').write('%s' % '\n'.join(all_domains))
-
-        # Stats
-        script_log_file.write('Number of domains downloaded: %s\n' % total_domains_downloaded)
-        script_log_file.write('Number of unique domains downloaded: %s\n' % unique_domains_downloaded)
-        script_log_file.write('Number of domains whitelisted to remove from downloaded lists: %s\n' % len(domains_to_remove))
-        script_log_file.write('Number of domains added to sinkhole: %s\n' % len(all_domains))
-
-        # Reload the bind configuration
-        os.system('rndc reload')
-        # Flush the DNS
-        os.system('rndc flush')
 
 
 if __name__ == '__main__':
