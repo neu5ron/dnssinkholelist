@@ -53,6 +53,7 @@ Malware Lists
 - [x] https://data.phishtank.com/data/online-valid.json
 - [x] https://ransomwaretracker.abuse.ch/downloads/RW_DOMBL.txt
 - [x] http://mirror1.malwaredomains.com/files/dynamic_dns.txt
+- [ ] https://www.threatcrowd.org/feeds/domains.txt
 - [ ] Add other domain blocklists from https://ransomwaretracker.abuse.ch/blocklist/ ?
 
 
