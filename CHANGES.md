@@ -1,8 +1,12 @@
 Changelog
 =========
-1.0.7 (2016-03-30)
+1.0.8 (2016-04-12)
 -------------------
--this is not a package :(
+-removed threatcrowd.org ssl verification
+
+1.0.7 (2016-04-12)
+-------------------
+-this is not a package and is meant to be ran from the CLI
 
 1.0.6 (2016-03-30)
 -------------------

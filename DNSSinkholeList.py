@@ -716,7 +716,7 @@ class download_and_parse_new_domains:
     def www_threatcrowd_org(self):
         download_url = "https://www.threatcrowd.org/feeds/domains.txt"
         download_name = 'www_threatcrowd_org'
-        if not self.DownloadURL(download_url, download_name):
+        if not self.DownloadURL(download_url, download_name, verify_ssl=False):
             return
         raw_filename = os.path.join(place_to_store_script_files, 'raw_download.' + download_name + '.sinkhole.tmp'  )
         parsed_filename = open( os.path.join(place_to_store_script_files, 'parsed_download.' + download_name + '.sinkhole.tmp' ), 'w+' )
