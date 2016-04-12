@@ -28,9 +28,10 @@ if sys.version_info >= (3,):
     sys.exit(1)
 else:
     INSTALL_REQUIRES.append("requests[security]")
-    INSTALL_REQUIRES.append("beautifulsoup")
+    INSTALL_REQUIRES.append("beautifulsoup4")
     INSTALL_REQUIRES.append("pyyaml")
     INSTALL_REQUIRES.append("argparse")
+    INSTALL_REQUIRES.append("lxml")
 
 setup(
     name=NAME,
