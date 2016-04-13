@@ -29,7 +29,7 @@ git clone https://github.com/neu5ron/dnssinkholelist.git
 
 Usage
 =======
-python2.7 dnssinkholelist/DNSSinkholeList.py
+python2.7 DNSSinkholeList.py
 
 
 Malware Lists
